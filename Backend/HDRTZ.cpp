@@ -18,7 +18,7 @@ using namespace std;
 
 const int SCREEN_WIDTH = 1920;
 const int SCREEN_HEIGHT = 1080;
-const int fps = 60;
+const int fps = 24;
 
 
 //function to convert an openCV Mat to a SDL_Texture
@@ -75,11 +75,17 @@ int main(int argc, char* args[]){
  char response[1024];
  memset(response, '\0', sizeof response);
 
-  
+  int rollingAverage[5];
+  rollingAverage[0] = 83;
+  rollingAverage[1] = 83;
+  rollingAverage[2] = 83;
+  rollingAverage[3] = 83;
+  rollingAverage[4] = 83;
+  int averageCount = 0;
   int lf_count = 0;
   float MAX_INTERVAL = 15;
   float audio = 0;
-  float interval = .5;
+  float interval = 0;
   SDL_Window* window = NULL;
   SDL_Surface* screenSurface = NULL;
   SDL_Renderer* renderer = NULL;
@@ -227,22 +233,27 @@ int main(int argc, char* args[]){
     */
 
     //handle crank data
-    int raw_crank_data;
-    raw_crank_data = atoi(response);
+    double raw_crank_data;
+    raw_crank_data = (double)atoi(response);
 
     //these values might need to change based on environment and setup
-    int idleLow  = 79, //91
-        idleHigh = 85,   //94
-        minVal   = 74,
-        maxVal   = 90;
+    int idleLow  = 82,//79, //91
+      idleHigh = 84,//85,   //94
+      minVal   = 75,//80,//74,
+      maxVal   = 89;//103;//90;
 
     /*int idleLow  = 368,
       idleHigh = 419,
       minVal   = 450,
       maxVal   = 368;
     */
-
-
+    rollingAverage[averageCount] = raw_crank_data;
+    double sum = 0;
+    for(int i = 0; i < 5; i++){
+      sum = sum + rollingAverage[i];
+    }
+    raw_crank_data = sum/5.0;
+    averageCount = (averageCount + 1)%5;
 
     if (n > 0){
       if(raw_crank_data >= idleLow && raw_crank_data <= idleHigh){
@@ -256,24 +267,24 @@ int main(int argc, char* args[]){
       }*/
       else if( raw_crank_data < idleLow){
 	//interval = (raw_crank_data - idleLow) * (MAX_INTERVAL / (idleLow - minVal));
-	interval = (raw_crank_data - idleLow) * (MAX_INTERVAL / (idleLow - minVal));
+	interval += .04*(raw_crank_data - idleLow) * (MAX_INTERVAL / (idleLow - minVal));
    
       }      
       else if(raw_crank_data > idleHigh){
 	//interval = (raw_crank_data - idleHigh) * (MAX_INTERVAL / (maxVal - idleHigh));
-	interval = (raw_crank_data - idleHigh) * (MAX_INTERVAL / (maxVal - idleHigh));
+	interval += .04*(raw_crank_data - idleHigh) * (MAX_INTERVAL / (maxVal - idleHigh));
       }
     }
 
     if(interval > 0){
-      interval -= 0.01;
-      if(interval < 0){
+      interval *= 0.92;
+      if(interval < .01){
 	interval = 0;
       }
     }
     else if(interval < 0){
-      interval += 0.01;
-      if(interval > 0){
+      interval *= 0.92;
+      if(interval > -0.01){
 	interval = 0;
       }
     }
