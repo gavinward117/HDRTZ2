@@ -237,10 +237,10 @@ int main(int argc, char* args[]){
     raw_crank_data = (double)atoi(response);
 
     //these values might need to change based on environment and setup
-    int idleLow  = 82,//79, //91
-      idleHigh = 84,//85,   //94
-      minVal   = 75,//80,//74,
-      maxVal   = 89;//103;//90;
+    int idleLow  = 87,//79, //91
+      idleHigh = 91,//85,   //94
+      minVal   = 84,//80,//74,
+      maxVal   = 94;//103;//90;
 
     /*int idleLow  = 368,
       idleHigh = 419,
