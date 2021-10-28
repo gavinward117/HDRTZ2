@@ -1,5 +1,4 @@
 
 ./HDRTZ.out &
-./audio/xwax/xwax -a default -p ~/Downloads/test.wav -q 0 &
-
+./audio/xwax -a default -q 0 -p ../../test.wav
 

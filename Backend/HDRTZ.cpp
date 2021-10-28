@@ -1,4 +1,4 @@
-#include <SDL.h>
+//#include <SDL.h>
 #include <stdio.h>
 #include <opencv2/opencv.hpp>
 #include <jsoncpp/json/json.h>
@@ -16,10 +16,9 @@
 using namespace cv;
 using namespace std;
 
-const int SCREEN_WIDTH = 1920;
-const int SCREEN_HEIGHT = 1080;
+const int SCREEN_WIDTH = 3840;
+const int SCREEN_HEIGHT = 2160;
 const int fps = 24;
-
 
 //function to convert an openCV Mat to a SDL_Texture
 SDL_Texture * TexFromCV(const Mat& mat, SDL_Renderer* renderer);
@@ -28,6 +27,8 @@ int main(int argc, char* args[]){
 
   //usb device to read crank input from
   int USB = open( "/dev/ttyUSB0", O_RDWR| O_NOCTTY );
+  float min = 100;
+  float max = 0;
 
   
   
@@ -76,11 +77,11 @@ int main(int argc, char* args[]){
  memset(response, '\0', sizeof response);
 
   int rollingAverage[5];
-  rollingAverage[0] = 83;
-  rollingAverage[1] = 83;
-  rollingAverage[2] = 83;
-  rollingAverage[3] = 83;
-  rollingAverage[4] = 83;
+  rollingAverage[0] = 82;
+  rollingAverage[1] = 82;
+  rollingAverage[2] = 82;
+  rollingAverage[3] = 82;
+  rollingAverage[4] = 82;
   int averageCount = 0;
   int lf_count = 0;
   float MAX_INTERVAL = 15;
@@ -136,9 +137,9 @@ int main(int argc, char* args[]){
 
   while(!quit){
     
-     std::ifstream coords("/home/nvidia/Downloads/sdl2/HDRTZ/api/output.json", std::ifstream::binary);
+     std::ifstream coords("/home/nvidia/Downloads/sdl2/HDRTZ2/api/output.json", std::ifstream::binary);
      //Handle the input from the website
-    ifstream ifs("/home/nvidia/Downloads/sdl2/HDRTZ/api/output.json");
+    ifstream ifs("/home/nvidia/Downloads/sdl2/HDRTZ2/api/output.json");
     Json::Reader reader;
     Json::Value obj;
     reader.parse(ifs, obj);
@@ -237,10 +238,10 @@ int main(int argc, char* args[]){
     raw_crank_data = (double)atoi(response);
 
     //these values might need to change based on environment and setup
-    int idleLow  = 87,//79, //91
-      idleHigh = 91,//85,   //94
-      minVal   = 84,//80,//74,
-      maxVal   = 94;//103;//90;
+    float idleLow  = 80.4,//79, //91
+      idleHigh = 83.8,//85,   //94
+      minVal   = 77.4,//80,//74,
+      maxVal   = 86.8;//103;//90;
 
     /*int idleLow  = 368,
       idleHigh = 419,
@@ -257,7 +258,7 @@ int main(int argc, char* args[]){
 
     if (n > 0){
       if(raw_crank_data >= idleLow && raw_crank_data <= idleHigh){
-	interval += 0;
+	      interval += 0;
       }      
       /*else if (raw_crank_data > maxVal){
 	interval = MAX_INTERVAL;
@@ -294,7 +295,14 @@ int main(int argc, char* args[]){
     else if(interval < MAX_INTERVAL*-1){
       interval = MAX_INTERVAL*-1;
     }
+    if(raw_crank_data < min){
+      min = raw_crank_data;
+    }
+    if(raw_crank_data > max){
+      max = raw_crank_data;
+    }
     std::cout << "rawCrankVal = " << raw_crank_data << " interval = " <<interval <<"\n";
+    std::cout << "current max = " << max << " min = " << min <<"\n";
     
     
     
