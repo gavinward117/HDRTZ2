@@ -243,7 +243,7 @@ int main(int argc, char* args[]){
 
     //these values might need to change based on environment and setup
     float idleLow  = 80.4,//79, //91
-      idleHigh = 83.8,//85,   //94
+      idleHigh = 84.0,//85,   //94
       minVal   = 77.4,//80,//74,
       maxVal   = 86.8;//103;//90;
 
