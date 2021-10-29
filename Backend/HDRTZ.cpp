@@ -13,6 +13,7 @@
 #include <string.h>
 #include <SDL2/SDL_image.h>
 #include <fstream>
+#include <stdlib.h>
 using namespace cv;
 using namespace std;
 
@@ -86,6 +87,9 @@ int main(int argc, char* args[]){
   int lf_count = 0;
   float MAX_INTERVAL = 15;
   float audio = 0;
+  float audioSpeed = 0;
+  char charAudio[10];
+  char* audioCommand = (char*)malloc(100*sizeof(char));
   float interval = 0;
   SDL_Window* window = NULL;
   SDL_Surface* screenSurface = NULL;
@@ -340,13 +344,30 @@ int main(int argc, char* args[]){
     angle += interval;
 
    
-    audio = interval / (MAX_INTERVAL * 2);
+   //HERE IS WHERE AUDIO WILL BE PLAYED ACCORDING TO INTERVAL
+   // shell command is echo "1.0" > /tmp/pitch where the number is the float value
+    //allocate 64 bytes jus cause
+    /*
+    audioSpeed = interval/(MAX_INTERVAL);
+    //audioSpeed = floorf(audioSpeed*100)/100;
+    sprintf(charAudio,"%.1f",audioSpeed);
+    strcpy(audioCommand,"echo \"");
+    strcat(audioCommand, charAudio);
+    strcat(audioCommand,"\" > /tmp/pitch");
+
+    printf(audioCommand,"\n");
+    system(audioCommand);*/
+    //free(audioCommand);
+
+    audio = interval / (MAX_INTERVAL);
     ofstream outputFile("/tmp/pitch");
     //...
+    sprintf(charAudio,"%f",audio);
+    printf(charAudio);
     outputFile << to_string(audio);
     outputFile.close();
     }
-
+    
     //lock the framerate to the value provided by fps
     //if this isn't here, the image can become jittery
     /*    if((1000/fps) > SDL_GetTicks() - start_tick){
@@ -357,6 +378,7 @@ int main(int argc, char* args[]){
 		  }
     */
   }
+  free(audioCommand);
 }
 
 //Function to convert openCV mat to SDL_Texture
