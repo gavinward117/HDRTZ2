@@ -9,32 +9,110 @@ const api = axios.create({
 class App extends React.Component {
 
   state = {
-    moveUp: 0,
-    moveDown: 0,
-    moveLeft: 0,
-    moveRight: 0
+    up: 0,
+    down: 0,
+    left: 0,
+    right: 0,
+    zoom: 0,
+    mask: 0,
+    crosshair: 0
   }
 
   constructor(props) {
     super(props);
+
     this.state = {
-      moveUp: 0,
-      moveDown: 0,
-      moveLeft: 0,
-      moveRight: 0
+      up: 0,
+      down: 0,
+      left: 0,
+      right: 0,
+      zoom: 0,
+      mask: 0,
+      crosshair: 0
     }
   }
 
+  componentDidUpdate(prevState) {
+    if(this.state !== prevState){
+      this.submit();
+    }
+  }
 
-  submit = (e) => {
+  moveUp = e => {
     e.preventDefault();
     console.log(this.state);
+    if (this.state.up === 1) {
+      this.setState({ up: 0 });
+    }
+    if (this.state.up === 0) {
+      this.setState({ up: 1 });
+    }
+  }
+
+  moveDown = e => {
+    e.preventDefault();
+
+    if (this.state.down === 1) {
+      this.setState({ down: 0 });
+    }
+    if (this.state.down === 0) {
+      this.setState({ down: 1 });
+    }
+  }
+
+  moveLeft = e => {
+    e.preventDefault();
+
+    if (this.state.left === 1) {
+      this.setState({ left: 0 });
+    }
+    if (this.state.left === 0) {
+      this.setState({ left: 1 });
+    }
+  }
+
+  moveRight = e => {
+    e.preventDefault();
+
+    if (this.state.right === 1) {
+      this.setState({ right: 0 });
+      console.log(this.state);
+    }
+    if (this.state.right === 0) {
+      this.setState({ right: 1 });
+      console.log(this.state);
+    }
+  }
+
+  adjustZoom = e => {
+    e.preventDefault();
+
+    var zoomVal = document.getElementById("zoom-slider").value;
+    this.setState({ zoom: zoomVal });
+  }
+
+  maskToggle = e => {
+    e.preventDefault();
+
+    var maskVal = document.getElementById("mask-toggle").value;
+    this.setState({ mask: maskVal });
+  }
+
+  crosshairToggle = e => {
+    e.preventDefault();
+
+    var crosshairVal = document.getElementById("crosshair-toggle").value;
+    this.setState({ crosshair: crosshairVal });
+  }
+
+  submit() {
+    console.log(this.state);
     api
-    .post('/', this.state)
-    .then(() => console.log('Posted to api'))
-    .catch(err => {
-      console.error(err);
-    });
+      .post('/', this.state)
+      .then(() => console.log('Posted to api'))
+      .catch(err => {
+        console.error(err);
+      });
   }
 
 
@@ -62,16 +140,16 @@ class App extends React.Component {
               </div>
               <div class="row">
                 <div class="col-3">
-                  <button type="button" class="btn btn-color col-10" onClick = {this.submit}>Up</button>
+                  <button type="button" class="btn btn-color col-10" onClick={this.moveUp}>Up</button>
                 </div>
                 <div class="col-3">
-                  <button type="button" class="btn btn-color col-10">Down</button>
+                  <button type="button" class="btn btn-color col-10" onClick={this.moveDown}>Down</button>
                 </div>
                 <div class="col-3">
-                  <button type="button" class="btn btn-color col-10">Left</button>
+                  <button type="button" class="btn btn-color col-10" onClick={this.moveLeft}>Left</button>
                 </div>
                 <div class="col-3">
-                  <button type="button" class="btn btn-color col-10">Right</button>
+                  <button type="button" class="btn btn-color col-10" onClick={this.moveRight}>Right</button>
                 </div>
               </div>
               <div class="row">
@@ -86,7 +164,7 @@ class App extends React.Component {
               <div class="row">
                 <div class="col-1">1x</div>
                 <div class="col-10">
-                  <input type="range" class="form-range" min="0" max="100"></input>
+                  <input id="zoom-slider" type="range" class="form-range" onChange={this.adjustZoom} min="0" max="100"></input>
                 </div>
                 <div class="col-1">4x</div>
               </div>
@@ -99,7 +177,7 @@ class App extends React.Component {
                 </div>
                 <div class="col-3">
                   <label class="switch switch-flat switch-format">
-                    <input class="switch-input" type="checkbox" />
+                    <input id="mask-toggle" class="switch-input" type="checkbox" onChange={this.maskToggle}/>
                     <span class="switch-label" data-on="On" data-off="Off"></span>
                     <span class="switch-handle"></span>
                   </label>
@@ -109,7 +187,7 @@ class App extends React.Component {
                 </div>
                 <div class="col-3">
                   <label class="switch switch-flat switch-format">
-                    <input class="switch-input" type="checkbox" />
+                    <input id="crosshair-toggle" class="switch-input" type="checkbox" onChange={this.crosshairToggle}/>
                     <span class="switch-label" data-on="On" data-off="Off"></span>
                     <span class="switch-handle"></span>
                   </label>
