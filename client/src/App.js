@@ -1,87 +1,64 @@
 import React, { Component } from 'react';
 import './App.css';
 import axios from 'axios';
+import data from './output.json';
 
 const api = axios.create({
   baseURL: 'http://localhost:3000'
 })
 
+const move_amount = 10;
+
 class App extends React.Component {
 
-  state = {
-    up: 0,
-    down: 0,
-    left: 0,
-    right: 0,
-    zoom: 0,
-    mask: 0,
-    crosshair: 0
-  }
 
   constructor(props) {
     super(props);
 
     this.state = {
-      up: 0,
-      down: 0,
-      left: 0,
-      right: 0,
+      xPos: 0,
+      yPos: 0,
       zoom: 0,
       mask: 0,
-      crosshair: 0
+      crosshair: 0,
+      calibrate: 0
     }
+
+    this.state = data;
   }
 
   componentDidUpdate(prevState) {
-    if(this.state !== prevState){
+    if (this.state !== prevState) {
       this.submit();
+
+      if (this.state.calibrate === 1) {
+        this.setState({ calibrate: 0 });
+      }
     }
   }
 
   moveUp = e => {
     e.preventDefault();
-    console.log(this.state);
-    if (this.state.up === 1) {
-      this.setState({ up: 0 });
-    }
-    if (this.state.up === 0) {
-      this.setState({ up: 1 });
-    }
+
+    this.setState({ yPos: this.state.yPos + move_amount });
   }
 
   moveDown = e => {
     e.preventDefault();
 
-    if (this.state.down === 1) {
-      this.setState({ down: 0 });
-    }
-    if (this.state.down === 0) {
-      this.setState({ down: 1 });
-    }
+    this.setState({ yPos: this.state.yPos - move_amount });
   }
 
   moveLeft = e => {
     e.preventDefault();
 
-    if (this.state.left === 1) {
-      this.setState({ left: 0 });
-    }
-    if (this.state.left === 0) {
-      this.setState({ left: 1 });
-    }
+    this.setState({ xPos: this.state.xPos - move_amount });
   }
 
   moveRight = e => {
     e.preventDefault();
 
-    if (this.state.right === 1) {
-      this.setState({ right: 0 });
-      console.log(this.state);
-    }
-    if (this.state.right === 0) {
-      this.setState({ right: 1 });
-      console.log(this.state);
-    }
+    this.setState({ xPos: this.state.xPos + move_amount });
   }
 
   adjustZoom = e => {
@@ -89,6 +66,18 @@ class App extends React.Component {
 
     var zoomVal = document.getElementById("zoom-slider").value;
     this.setState({ zoom: zoomVal });
+  }
+
+  calibrate = e => {
+    e.preventDefault();
+
+    this.setState({ calibrate: 1 });
+  }
+
+  reset = e => {
+    e.preventDefault();
+
+    this.setState({ xPos: 0, yPos: 0, zoom: 0 });
   }
 
   maskToggle = e => {
@@ -164,7 +153,7 @@ class App extends React.Component {
               <div class="row">
                 <div class="col-1">1x</div>
                 <div class="col-10">
-                  <input id="zoom-slider" type="range" class="form-range" onChange={this.adjustZoom} min="0" max="100"></input>
+                  <input id="zoom-slider" type="range" class="form-range" defaultValue={this.state.zoom} onChange={this.adjustZoom} min="0" max="100"></input>
                 </div>
                 <div class="col-1">4x</div>
               </div>
@@ -177,7 +166,7 @@ class App extends React.Component {
                 </div>
                 <div class="col-3">
                   <label class="switch switch-flat switch-format">
-                    <input id="mask-toggle" class="switch-input" type="checkbox" onChange={this.maskToggle}/>
+                    <input id="mask-toggle" class="switch-input" type="checkbox" onChange={this.maskToggle} />
                     <span class="switch-label" data-on="On" data-off="Off"></span>
                     <span class="switch-handle"></span>
                   </label>
@@ -187,7 +176,7 @@ class App extends React.Component {
                 </div>
                 <div class="col-3">
                   <label class="switch switch-flat switch-format">
-                    <input id="crosshair-toggle" class="switch-input" type="checkbox" onChange={this.crosshairToggle}/>
+                    <input id="crosshair-toggle" class="switch-input" type="checkbox" onChange={this.crosshairToggle} />
                     <span class="switch-label" data-on="On" data-off="Off"></span>
                     <span class="switch-handle"></span>
                   </label>
@@ -196,12 +185,11 @@ class App extends React.Component {
                   &nbsp;
                 </div>
                 <div class="row">
-                  <div class="col-3">
+                  <div class="col-6">
+                    <button type="button" class="btn btn-color col-10" onClick={this.calibrate}>Calibrate Crank When Idle</button>
                   </div>
                   <div class="col-6">
-                    <button type="button" class="btn btn-color col-10">Calibrate Crank When Idle</button>
-                  </div>
-                  <div class="col-3">
+                    <button type="button" class="btn btn-color col-10" onClick={this.reset}>Reset Position</button>
                   </div>
                 </div>
               </div>
