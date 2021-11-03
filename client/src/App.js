@@ -64,7 +64,7 @@ class App extends React.Component {
   adjustZoom = e => {
     e.preventDefault();
 
-    var zoomVal = document.getElementById("zoom-slider").value;
+    var zoomVal = parseInt(document.getElementById("zoom-slider").value);
     this.setState({ zoom: zoomVal });
   }
 
