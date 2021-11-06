@@ -104,6 +104,9 @@ int main(int argc, char *args[])
   SDL_Surface *screenSurface = NULL;
   SDL_Renderer *renderer = NULL;
 
+  FILE *bluetoothFile;
+  char crankValueStr[3] = "";
+
   //initialize SDL Things
   if (SDL_Init(SDL_INIT_VIDEO) < 0)
     printf("SDL_ERROR: %s\n", SDL_GetError());
@@ -153,7 +156,6 @@ int main(int argc, char *args[])
 
   while (!quit)
   {
-
     std::ifstream coords("/home/nvidia/Downloads/sdl2/HDRTZ2/api/output.json", std::ifstream::binary);
     //Handle the input from the website
     ifstream ifs("/home/nvidia/Downloads/sdl2/HDRTZ2/api/output.json");
@@ -171,11 +173,18 @@ int main(int argc, char *args[])
     videostream.w = 3840;
     videostream.h = 2160;
 
-    videostream.x = 0 + obj["xPos"].asInt();     //-3840/4;//-1 * (obj["x"].asInt());
-    p.x = int(3840 * scaleFactor) +  obj["xPos"].asInt();//* .25*log2(.25*scaleFactor)); //960+obj["x"].asInt();
-
-    videostream.y = 0 + obj["yPos"].asInt();     //-2160/4;//-1 * (obj["y"].asInt());
-    p.y = int(2160 * scaleFactor) + obj["yPos"].asInt();// *.25*log2(.25*scaleFactor)); //540+obj["y"].asInt();
+    videostream.x = 0 + 960 - scaleFactor * 3840 / 2;// - 960 * obj["zoom"].asInt() / 100;// + obj["xPos"].asInt();     //-3840/4;//-1 * (obj["x"].asInt());
+    p.x = 0;//int(3840 * scaleFactor +  obj["xPos"].asInt());//* .25*log2(.25*scaleFactor)); //960+obj["x"].asInt();
+    
+    //p.x = int(1920/2);// +  obj["xPos"].asInt();//* .25*log2(.25*scaleFactor)); //960+obj["x"].asInt();
+    
+    //int* tempW;
+    //int* tempH;
+    //SDL_GetRendererOutputSize(renderer, tempW, tempH);
+    //std::cout << "Renderer width: " << *tempW << "Renderer height: " << *tempH << "\n";
+    videostream.y = 0 + 540 - scaleFactor * 2160 / 2;// - 540 * obj["zoom"].asInt() / 100;//obj["yPos"].asInt();     //-2160/4;//-1 * (obj["y"].asInt());
+    p.y = 0;//int(2160 * scaleFactor + obj["yPos"].asInt());// *.25*log2(.25*scaleFactor)); //540+obj["y"].asInt();
+    //p.y = int(1080*.25*log2(.25*scaleFactor)); //540+obj["y"].asInt();
     crosshair = obj["crosshair"].asInt();
     mask = obj["mask"].asInt();
 
@@ -248,14 +257,18 @@ int main(int argc, char *args[])
     */
 
     //handle crank data
+    bluetoothFile = fopen("bluetooth_output.txt", "r");
+    fscanf(bluetoothFile, "%s", crankValueStr);
+    fclose(bluetoothFile);
     double raw_crank_data;
-    raw_crank_data = (double)atoi(response);
+    raw_crank_data = (double)atoi(crankValueStr);
+
 
     //these values might need to change based on environment and setup
     float idleLow = 80.0, //79, //91
-        idleHigh = 84.0,  //85,   //94
-        minVal = 72.0,    //80,//74,
-        maxVal = 92.0;    //103;//90;
+        idleHigh = 86.0,  //85,   //94
+        minVal = 70.0,    //80,//74,
+        maxVal = 100.0;    //103;//90;
 
     /*int idleLow  = 368,
       idleHigh = 419,
@@ -271,9 +284,9 @@ int main(int argc, char *args[])
     raw_crank_data = sum / 3.0;
     averageCount = (averageCount + 1) % aveWindow;
     //raw_crank_data = 82;
-    if (n > 0)
-    {
-      /*
+    //if (n > 0)
+    //{
+      
       if(raw_crank_data <= idleHigh && raw_crank_data >= idleLow){
         interval = 0;
       }
@@ -288,7 +301,7 @@ int main(int argc, char *args[])
       }
       else if (raw_crank_data >= minVal){
         interval = -1*MAX_INTERVAL;
-      }*/
+      }
 
       /*
       if (raw_crank_data >= old_raw_data[0] && raw_crank_data >= old_raw_data[1] && raw_crank_data >= old_raw_data[2]){
@@ -310,7 +323,7 @@ int main(int argc, char *args[])
 	interval = MAX_INTERVAL * -1;
       }*/
       //compare old data to new data
-
+/*
       if (raw_crank_data < idleLow)
       {
 
@@ -320,7 +333,7 @@ int main(int argc, char *args[])
       {
         interval += INTERVAL_CONST * (raw_crank_data - idleHigh) * (MAX_INTERVAL / (maxVal - idleHigh));
       }
-
+*/
       /*
       else if(raw_crank_data > idleHigh && !increasing){
         interval -= INTERVAL_CONST*(raw_crank_data - idleHigh) * (MAX_INTERVAL / (maxVal - idleHigh));
@@ -361,7 +374,7 @@ int main(int argc, char *args[])
       {
         interval = 0;
       }
-    }
+    //}
     std::cout << "rawCrankVal = " << raw_crank_data << " interval = " << interval << "\n";
     std::cout << "current max = " << max << " min = " << min << "\n";
 
@@ -380,7 +393,9 @@ int main(int argc, char *args[])
     {
       //Render the frame if it exists
       SDL_RenderClear(renderer);
-      SDL_RenderCopyEx(renderer, tex, NULL, &videostream, angle, &p, SDL_FLIP_NONE);
+      SDL_RenderCopyEx(renderer, tex, NULL, &videostream, angle, NULL, SDL_FLIP_NONE);
+
+      //SDL_RenderCopyEx(renderer, tex, NULL, &videostream, angle, &p, SDL_FLIP_NONE);
       SDL_RenderSetScale(renderer, scaleFactor, scaleFactor);
       cout << "mask: " << mask << " crosshair: " << crosshair << endl;
 
@@ -388,6 +403,7 @@ int main(int argc, char *args[])
       if (mask == 1)
       {
         SDL_RenderCopy(renderer, maskTex, NULL, NULL);
+
       }
 
       //render the crosshair
