@@ -71,6 +71,7 @@ int main(int argc, char *args[])
     std::cout << "Error " << errno << " from tcsetattr" << std::endl;
   }
 
+
   int n = 0,
       spot = 0;
   char buf = '\0';
@@ -84,10 +85,7 @@ int main(int argc, char *args[])
   rollingAverage[0] = 82;
   rollingAverage[1] = 82;
   rollingAverage[2] = 82;
-  float old_raw_data[3];
-  old_raw_data[0] = 82;
-  old_raw_data[1] = 82;
-  old_raw_data[2] = 82;
+
   int data_index = 0;
   bool increasing = true; //false for dec
   //rollingAverage[3] = 82;
@@ -283,75 +281,18 @@ int main(int argc, char *args[])
     }
     raw_crank_data = sum / 3.0;
     averageCount = (averageCount + 1) % aveWindow;
-    //raw_crank_data = 82;
-    //if (n > 0)
-    //{
-      
-      if(raw_crank_data <= idleHigh && raw_crank_data >= idleLow){
-        interval = 0;
-      }
-      else if (raw_crank_data > idleHigh && raw_crank_data < maxVal) {
-        interval = (raw_crank_data - idleHigh) / (maxVal - idleHigh) * MAX_INTERVAL;
-      }
-      else if (raw_crank_data >= maxVal){
-        interval = MAX_INTERVAL;
-      }
-      else if (raw_crank_data < idleHigh && raw_crank_data > minVal) {
-        interval = (raw_crank_data - idleLow) / (minVal - idleLow) * -1*MAX_INTERVAL;
-      }
-      else if (raw_crank_data >= minVal){
-        interval = -1*MAX_INTERVAL;
-      }
+   
 
-      /*
-      if (raw_crank_data >= old_raw_data[0] && raw_crank_data >= old_raw_data[1] && raw_crank_data >= old_raw_data[2]){
-        increasing = true;
-      }
-      else if (raw_crank_data < old_raw_data[0] && raw_crank_data < old_raw_data[1] && raw_crank_data < old_raw_data[2]){
-        increasing = false;
-      }
-      old_raw_data[data_index] = raw_crank_data;
-      data_index++;
-      data_index = data_index%3;
-      if(raw_crank_data >= idleLow && raw_crank_data <= idleHigh){
-	      interval += 0;
-      } 
-      else if (raw_crank_data > maxVal){
-	interval = MAX_INTERVAL;
-      }
-      else if(raw_crank_data < minVal){
-	interval = MAX_INTERVAL * -1;
-      }*/
-      //compare old data to new data
-/*
+
       if (raw_crank_data < idleLow)
       {
 
-        interval += INTERVAL_CONST * (raw_crank_data - idleLow) * (MAX_INTERVAL / (idleLow - minVal));
+        interval += INTERVAL_CONST * (raw_crank_data - idleLow) * -1*(MAX_INTERVAL / (idleLow - minVal));
       }
       else if (raw_crank_data > idleHigh)
       {
-        interval += INTERVAL_CONST * (raw_crank_data - idleHigh) * (MAX_INTERVAL / (maxVal - idleHigh));
+        interval += INTERVAL_CONST * (raw_crank_data - idleHigh) * -1*(MAX_INTERVAL / (maxVal - idleHigh));
       }
-*/
-      /*
-      else if(raw_crank_data > idleHigh && !increasing){
-        interval -= INTERVAL_CONST*(raw_crank_data - idleHigh) * (MAX_INTERVAL / (maxVal - idleHigh));
-      }*/
-      //}
-      /*
-  if(interval > 0){
-      interval *= 0.5;
-      if(interval < .01){
-	interval = 0;
-      }
-    }
-    else if(interval < 0){
-      interval *= 0.5;
-      if(interval > -0.01){
-	interval = 0;
-      }
-    }*/
 
       if (interval > MAX_INTERVAL)
       {
@@ -359,7 +300,7 @@ int main(int argc, char *args[])
       }
       else if (interval < MAX_INTERVAL * -1)
       {
-        interval = MAX_INTERVAL * -1;
+        interval = -1* MAX_INTERVAL;
       }
 
       if (raw_crank_data < min)
@@ -417,41 +358,18 @@ int main(int argc, char *args[])
       SDL_DestroyTexture(tex);
       angle += interval;
 
-      //HERE IS WHERE AUDIO WILL BE PLAYED ACCORDING TO INTERVAL
-      // shell command is echo "1.0" > /tmp/pitch where the number is the float value
-      //allocate 64 bytes jus cause
-      /*
-    audioSpeed = interval/(MAX_INTERVAL);
-    //audioSpeed = floorf(audioSpeed*100)/100;
-    sprintf(charAudio,"%.1f",audioSpeed);
-    strcpy(audioCommand,"echo \"");
-    strcat(audioCommand, charAudio);
-    strcat(audioCommand,"\" > /tmp/pitch");
 
-    printf(audioCommand,"\n");
-    system(audioCommand);*/
-      //free(audioCommand);
 
       audio = interval / (MAX_INTERVAL);
       ofstream outputFile("/tmp/pitch");
-      //...
-      sprintf(charAudio, "%f", audio);
-      //printf(charAudio);
+
+
       outputFile << to_string(audio);
       outputFile.close();
     }
 
-    //lock the framerate to the value provided by fps
-    //if this isn't here, the image can become jittery
-    /*    if((1000/fps) > SDL_GetTicks() - start_tick){
-	SDL_Delay((1000/fps)-(SDL_GetTicks()-start_tick));
-      }
-    else if((1000/fps) < SDL_GetTicks() - start_tick){
-		  lf_count++;
-		  }
-    */
   }
-  //free(audioCommand);
+
 }
 
 //Function to convert openCV mat to SDL_Texture
