@@ -40,7 +40,7 @@ int main(int argc, char *args[])
   /* Error Handling */
   if (tcgetattr(USB, &tty) != 0)
   {
-    std::cout << "Error " << errno << " from tcgetattr: " << strerror(errno) << std::endl;
+    //std::cout << "Error " << errno << " from tcgetattr: " << strerror(errno) << std::endl;
   }
 
   /* Save old tty parameters */
@@ -68,7 +68,7 @@ int main(int argc, char *args[])
   tcflush(USB, TCIFLUSH);
   if (tcsetattr(USB, TCSANOW, &tty) != 0)
   {
-    std::cout << "Error " << errno << " from tcsetattr" << std::endl;
+    //std::cout << "Error " << errno << " from tcsetattr" << std::endl;
   }
 
 
@@ -85,7 +85,8 @@ int main(int argc, char *args[])
   rollingAverage[0] = 82;
   rollingAverage[1] = 82;
   rollingAverage[2] = 82;
-
+  int scriptPos = 0;
+  int testscript[500] = {82,82,82,82,82,82,82,82,82,82,82,82,82,82,82,82,82,82,82,82,82,82,82,82,82,82,82,82,82,82,82,82,82,82,82,82, 85,85,85,85,87,87,87,87,87,89,89,89,89,91,91,91,91,93,93,93,93,95,95,95,95,96,96,96,96,97,97,97,97,98,98,98,98,99,99,99,99,100, 100,100,100,101,101,101,101,102,102,102,102,103,103,103,103,103,103,103,103,103,103,103,103,103,103,103,103,103,103,103,103,103,103,103,103,103,103,103,103,103,103,103,103,103,103,103,103,103,103,103,103,103,103,103,103,103,103,103,103,103,103,103,103,103,103,103,103,103,103,103,103,103,103,103,103,103,103,103,103,103,103,103,103,103,103,103,103,103,103,103,103,103,103,103,103,103,103,103,103,103,103,103,103,103,103,103,103,103,103,103,103,102,102,102,102,100,100,100,100,98,98,98,95,95,95,95,95,95,95,95,94,94,94,94,92,92,92,92,90,90,90,90,87,87,87,87,84,84,84,84,82,82,82,82,82,82,82,82,82,82,82,82,82,82,82,82,82,82,82,82,82,82,82,82,82,82,82,82,82,82,82,82,80,80,80,80,79,79,79,79,78,78,78,78,77,77,77,77,75,75,75,75,74,74,74,74,72,72,72,72,70,70,70,70,69,69,69,69,68,68,68,68,68,68,68,68,68,68,68,68,68,68,68,68,68,68,68,68,68,68,68,68,68,68,68,68,68,68,68,68,68,68,68,68,68,68,68,68,68,68,68,68,68,68,68,68,68,68,68,68,68,68,68,68,68,68,68,68,68,68,68,68,68,68,68,68,68,68,68,68,68,68,68,68,68,68,68,68,68,68,68,68,68,68,68,68,68,68,68,68,68,68,68,68,68,68,68,68,68,68,68,68,68,68,68,68,68,68,68,68,68,68,68,68,68,68,68,68,68,68,68,68,68,68,68,68,68,68,68,68,68,68,68,68,68,68,68,68,68,68,68,68,69,69,69,69,71,71,71,71,72,72,72,72,74,74,74,74,75,75,75,75,76,76,76,76,78,78,78,78,79,79,79,79,81,81,81,81,82,82,82,82,82,82,82,82,82,82,82,82};
   int data_index = 0;
   bool increasing = true; //false for dec
   //rollingAverage[3] = 82;
@@ -171,7 +172,7 @@ int main(int argc, char *args[])
     videostream.w = 3840;
     videostream.h = 2160;
 
-    videostream.x = 0 + 960 - scaleFactor * 3840 / 2;// - 960 * obj["zoom"].asInt() / 100;// + obj["xPos"].asInt();     //-3840/4;//-1 * (obj["x"].asInt());
+    videostream.x = obj["xPos"].asInt();// 0 + 960 - scaleFactor * 3840 / 2;// - 960 * obj["zoom"].asInt() / 100;// + obj["xPos"].asInt();     //-3840/4;//-1 * (obj["x"].asInt());
     p.x = 0;//int(3840 * scaleFactor +  obj["xPos"].asInt());//* .25*log2(.25*scaleFactor)); //960+obj["x"].asInt();
     
     //p.x = int(1920/2);// +  obj["xPos"].asInt();//* .25*log2(.25*scaleFactor)); //960+obj["x"].asInt();
@@ -180,7 +181,7 @@ int main(int argc, char *args[])
     //int* tempH;
     //SDL_GetRendererOutputSize(renderer, tempW, tempH);
     //std::cout << "Renderer width: " << *tempW << "Renderer height: " << *tempH << "\n";
-    videostream.y = 0 + 540 - scaleFactor * 2160 / 2;// - 540 * obj["zoom"].asInt() / 100;//obj["yPos"].asInt();     //-2160/4;//-1 * (obj["y"].asInt());
+    videostream.y = obj["yPos"].asInt();//0 + 540 - scaleFactor * 2160 / 2;// - 540 * obj["zoom"].asInt() / 100;//obj["yPos"].asInt();     //-2160/4;//-1 * (obj["y"].asInt());
     p.y = 0;//int(2160 * scaleFactor + obj["yPos"].asInt());// *.25*log2(.25*scaleFactor)); //540+obj["y"].asInt();
     //p.y = int(1080*.25*log2(.25*scaleFactor)); //540+obj["y"].asInt();
     crosshair = obj["crosshair"].asInt();
@@ -260,19 +261,16 @@ int main(int argc, char *args[])
     fclose(bluetoothFile);
     double raw_crank_data;
     raw_crank_data = (double)atoi(crankValueStr);
-
+    //raw_crank_data = testscript[scriptPos];
+    //scriptPos = (scriptPos+1)%500;
 
     //these values might need to change based on environment and setup
     float idleLow = 80.0, //79, //91
         idleHigh = 86.0,  //85,   //94
         minVal = 70.0,    //80,//74,
-        maxVal = 100.0;    //103;//90;
+        maxVal = 95.0;    //103;//90;
 
-    /*int idleLow  = 368,
-      idleHigh = 419,
-      minVal   = 450,
-      maxVal   = 368;
-    */
+
     rollingAverage[averageCount] = raw_crank_data;
     double sum = 0;
     for (int i = 0; i < aveWindow; i++)
