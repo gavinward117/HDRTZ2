@@ -3,6 +3,8 @@
 #include <opencv2/opencv.hpp>
 #include <jsoncpp/json/json.h>
 #include <opencv2/highgui.hpp>
+#include <opencv2/imgproc/imgproc_c.h>
+#include <opencv2/imgproc/imgproc.hpp>
 #include <iostream>
 #include <ctime>
 #include <thread>
@@ -86,7 +88,6 @@ int main(int argc, char *args[])
   rollingAverage[1] = 82;
   rollingAverage[2] = 82;
   int scriptPos = 0;
-  int testscript[500] = {82,82,82,82,82,82,82,82,82,82,82,82,82,82,82,82,82,82,82,82,82,82,82,82,82,82,82,82,82,82,82,82,82,82,82,82, 85,85,85,85,87,87,87,87,87,89,89,89,89,91,91,91,91,93,93,93,93,95,95,95,95,96,96,96,96,97,97,97,97,98,98,98,98,99,99,99,99,100, 100,100,100,101,101,101,101,102,102,102,102,103,103,103,103,103,103,103,103,103,103,103,103,103,103,103,103,103,103,103,103,103,103,103,103,103,103,103,103,103,103,103,103,103,103,103,103,103,103,103,103,103,103,103,103,103,103,103,103,103,103,103,103,103,103,103,103,103,103,103,103,103,103,103,103,103,103,103,103,103,103,103,103,103,103,103,103,103,103,103,103,103,103,103,103,103,103,103,103,103,103,103,103,103,103,103,103,103,103,103,103,102,102,102,102,100,100,100,100,98,98,98,95,95,95,95,95,95,95,95,94,94,94,94,92,92,92,92,90,90,90,90,87,87,87,87,84,84,84,84,82,82,82,82,82,82,82,82,82,82,82,82,82,82,82,82,82,82,82,82,82,82,82,82,82,82,82,82,82,82,82,82,80,80,80,80,79,79,79,79,78,78,78,78,77,77,77,77,75,75,75,75,74,74,74,74,72,72,72,72,70,70,70,70,69,69,69,69,68,68,68,68,68,68,68,68,68,68,68,68,68,68,68,68,68,68,68,68,68,68,68,68,68,68,68,68,68,68,68,68,68,68,68,68,68,68,68,68,68,68,68,68,68,68,68,68,68,68,68,68,68,68,68,68,68,68,68,68,68,68,68,68,68,68,68,68,68,68,68,68,68,68,68,68,68,68,68,68,68,68,68,68,68,68,68,68,68,68,68,68,68,68,68,68,68,68,68,68,68,68,68,68,68,68,68,68,68,68,68,68,68,68,68,68,68,68,68,68,68,68,68,68,68,68,68,68,68,68,68,68,68,68,68,68,68,68,68,68,68,68,68,68,69,69,69,69,71,71,71,71,72,72,72,72,74,74,74,74,75,75,75,75,76,76,76,76,78,78,78,78,79,79,79,79,81,81,81,81,82,82,82,82,82,82,82,82,82,82,82,82};
   int data_index = 0;
   bool increasing = true; //false for dec
   //rollingAverage[3] = 82;
@@ -135,9 +136,9 @@ int main(int argc, char *args[])
   //Initialize openCV camera and set up image capture
   VideoCapture cap;
   cap.open(1);
-  cap.set(CV_CAP_PROP_FRAME_WIDTH, 1920);
-  cap.set(CV_CAP_PROP_FRAME_HEIGHT, 1080);
-  cap.set(CV_CAP_PROP_FPS, fps);
+  cap.set(CAP_PROP_FRAME_WIDTH, 1920);
+  cap.set(CAP_PROP_FRAME_HEIGHT, 1080);
+  cap.set(CAP_PROP_FPS, fps);
   cout << "setting fps supported" << endl;
   if (!cap.isOpened())
   {
@@ -155,12 +156,16 @@ int main(int argc, char *args[])
 
   while (!quit)
   {
-    std::ifstream coords("/home/nvidia/Downloads/sdl2/HDRTZ2/api/output.json", std::ifstream::binary);
+    std::ifstream coords("~/Desktop/HDRTZ2/api/output.json", std::ifstream::binary);
     //Handle the input from the website
-    ifstream ifs("/home/nvidia/Downloads/sdl2/HDRTZ2/api/output.json");
+    ifstream ifs("~/Desktop/HDRTZ2/api/output.json");
     Json::Reader reader;
     Json::Value obj;
-    reader.parse(ifs, obj);
+    bool errs;
+    //reader.parse(ifs, obj);
+    //Json::parseFromStream(reader,ifs,&obj,&errs);
+    errs = reader.parse(coords,obj,false);
+
     int crosshair;
     int mask;
     float scaleFactor = 0.5 + 0.5 * obj["zoom"].asInt() / 100;
@@ -187,6 +192,8 @@ int main(int argc, char *args[])
     crosshair = obj["crosshair"].asInt();
     mask = obj["mask"].asInt();
 
+
+    
     while (SDL_PollEvent(&e) != 0)
     {
       //User requests quit
@@ -316,6 +323,7 @@ int main(int argc, char *args[])
     //}
     std::cout << "rawCrankVal = " << raw_crank_data << " interval = " << interval << "\n";
     std::cout << "current max = " << max << " min = " << min << "\n";
+    std::cout << "mask: " <<mask<<"\n";
 
     spot = 0;
     Mat frame;
