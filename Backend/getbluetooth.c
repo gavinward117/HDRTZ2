@@ -9,11 +9,12 @@ int main()
     FILE *fpipe;
     FILE *fp;
     char *filename = "bluetooth_output.txt";
-    char *command = "gatttool -b 03:81:56:96:83:09 --char-read -a 0x000c";
+    //char *command = "gatttool -b 03:81:56:96:83:09 --char-read -a 0x000c";
+    char *command = "gatttool -b 4C:EB:D6:4C:AE:26 --char-read -a 0x000c";
     char c = 0;
     int i = 0;
     char output[36] = "";
-    char valueHex[3] = "";
+    char valueHex[5] = "";
     int valueDec = 0;
     char valueDecStr[3] = "";
 
@@ -34,10 +35,15 @@ int main()
         }
         pclose(fpipe);
 
-        memcpy(valueHex, &output[33], 2);
-        valueHex[2] = '\0';
+        memcpy(valueHex + 2, &output[33], 2);
+        memcpy(valueHex, &output[36], 2);
+        valueHex[4] = '\0';
 
-        valueDec = hexToDec(valueHex[1]) + hexToDec(valueHex[0]) * 16;\
+        valueDec = 
+        hexToDec(valueHex[0]) * 4096 +
+        hexToDec(valueHex[1]) * 256 +
+        hexToDec(valueHex[2]) * 16 +
+        hexToDec(valueHex[3]);
 
         fp = fopen(filename, "w+");
         sprintf(valueDecStr, "%i\n", valueDec);

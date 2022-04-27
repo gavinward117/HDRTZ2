@@ -4,4 +4,4 @@ ps -aux | grep getbluetooth
 killall getbluetooth inotifywait
 ./getbluetooth &
 ./HDRTZ.out & 
-./audio/xwax -t serato_2a -a default -q 0 -p audio/RomanceAnonimo.m4a &
+#./audio/xwax-1.8/xwax -t serato_2a -a default -q 0 -l audio/RomanceAnonimo.m4a &

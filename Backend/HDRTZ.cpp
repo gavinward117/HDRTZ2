@@ -29,9 +29,7 @@ SDL_Texture *TexFromCV(const Mat &mat, SDL_Renderer *renderer);
 
 int main(int argc, char *args[])
 {
-
-  //usb device to read crank input from
-  int USB = open("/dev/ttyUSB0", O_RDWR | O_NOCTTY);
+  
   float min = 100;
   float max = 0;
 
@@ -39,11 +37,7 @@ int main(int argc, char *args[])
   struct termios tty_old;
   memset(&tty, 0, sizeof tty);
 
-  /* Error Handling */
-  if (tcgetattr(USB, &tty) != 0)
-  {
-    //std::cout << "Error " << errno << " from tcgetattr: " << strerror(errno) << std::endl;
-  }
+
 
   /* Save old tty parameters */
   tty_old = tty;
@@ -66,12 +60,7 @@ int main(int argc, char *args[])
   /* Make raw */
   cfmakeraw(&tty);
 
-  /* Flush Port, then applies attributes */
-  tcflush(USB, TCIFLUSH);
-  if (tcsetattr(USB, TCSANOW, &tty) != 0)
-  {
-    //std::cout << "Error " << errno << " from tcsetattr" << std::endl;
-  }
+
 
 
   int n = 0,
@@ -90,8 +79,7 @@ int main(int argc, char *args[])
   int scriptPos = 0;
   int data_index = 0;
   bool increasing = true; //false for dec
-  //rollingAverage[3] = 82;
-  //rollingAverage[4] = 82;
+
   int averageCount = 0;
   int lf_count = 0;
   float MAX_INTERVAL = 15;
@@ -156,14 +144,13 @@ int main(int argc, char *args[])
 
   while (!quit)
   {
-    std::ifstream coords("~/Desktop/HDRTZ2/api/output.json", std::ifstream::binary);
+    std::ifstream coords("output.json", std::ifstream::binary);
     //Handle the input from the website
-    ifstream ifs("~/Desktop/HDRTZ2/api/output.json");
+    ifstream ifs("output.json");
     Json::Reader reader;
     Json::Value obj;
     bool errs;
-    //reader.parse(ifs, obj);
-    //Json::parseFromStream(reader,ifs,&obj,&errs);
+
     errs = reader.parse(coords,obj,false);
 
     int crosshair;
@@ -172,23 +159,14 @@ int main(int argc, char *args[])
 
     //Resize the capture to be the size of the screen
     SDL_Rect videostream;
-    //videostream.w = 1920;
-    //videostream.h = 1080;
+
     videostream.w = 3840;
     videostream.h = 2160;
 
-    videostream.x = obj["xPos"].asInt();// 0 + 960 - scaleFactor * 3840 / 2;// - 960 * obj["zoom"].asInt() / 100;// + obj["xPos"].asInt();     //-3840/4;//-1 * (obj["x"].asInt());
-    p.x = 0;//int(3840 * scaleFactor +  obj["xPos"].asInt());//* .25*log2(.25*scaleFactor)); //960+obj["x"].asInt();
-    
-    //p.x = int(1920/2);// +  obj["xPos"].asInt();//* .25*log2(.25*scaleFactor)); //960+obj["x"].asInt();
-    
-    //int* tempW;
-    //int* tempH;
-    //SDL_GetRendererOutputSize(renderer, tempW, tempH);
-    //std::cout << "Renderer width: " << *tempW << "Renderer height: " << *tempH << "\n";
-    videostream.y = obj["yPos"].asInt();//0 + 540 - scaleFactor * 2160 / 2;// - 540 * obj["zoom"].asInt() / 100;//obj["yPos"].asInt();     //-2160/4;//-1 * (obj["y"].asInt());
-    p.y = 0;//int(2160 * scaleFactor + obj["yPos"].asInt());// *.25*log2(.25*scaleFactor)); //540+obj["y"].asInt();
-    //p.y = int(1080*.25*log2(.25*scaleFactor)); //540+obj["y"].asInt();
+    videostream.x = obj["xPos"].asInt();
+    p.x = 0;
+    videostream.y = obj["yPos"].asInt();
+    p.y = 0;
     crosshair = obj["crosshair"].asInt();
     mask = obj["mask"].asInt();
 
@@ -247,35 +225,19 @@ int main(int argc, char *args[])
       std::cout << "Read nothing!" << std::endl;
     }
 
-    // convert response into interval
-
-    /*
-     ifstream myfile;
-     myfile.open("serial_data");
-     int raw_crank_data;
-     if (myfile.is_open()){
-       while(!myfile.eof()){
-	 myfile >> response;
-       }
-     }
-     myfile.close();
-
-    */
-
     //handle crank data
     bluetoothFile = fopen("bluetooth_output.txt", "r");
     fscanf(bluetoothFile, "%s", crankValueStr);
     fclose(bluetoothFile);
     double raw_crank_data;
     raw_crank_data = (double)atoi(crankValueStr);
-    //raw_crank_data = testscript[scriptPos];
-    //scriptPos = (scriptPos+1)%500;
+
 
     //these values might need to change based on environment and setup
-    float idleLow = 80.0, //79, //91
-        idleHigh = 86.0,  //85,   //94
-        minVal = 70.0,    //80,//74,
-        maxVal = 95.0;    //103;//90;
+    float idleLow = 80.0, 
+        idleHigh = 86.0,  
+        minVal = 70.0,   
+        maxVal = 95.0;    
 
 
     rollingAverage[averageCount] = raw_crank_data;
@@ -382,7 +344,7 @@ int main(int argc, char *args[])
 SDL_Texture *TexFromCV(const Mat &mat, SDL_Renderer *renderer)
 {
 
-  IplImage cvFrame = (IplImage)mat;
+  IplImage cvFrame = cvIplImage(mat);
   IplImage *cvFramePtr = &cvFrame;
 
   //create a surface first, luckily IplImage and surface seem to play nice
@@ -410,7 +372,7 @@ SDL_Texture *TexFromCV(const Mat &mat, SDL_Renderer *renderer)
   {
     SDL_FreeSurface(frameData);
 
-    //    cvReleaseImage(&cvFramePtr);
+   
     return frameTex;
   }
 }
