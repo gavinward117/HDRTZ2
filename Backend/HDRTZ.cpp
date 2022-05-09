@@ -30,8 +30,6 @@ int main(int argc, char *args[])
 {
 
 
-  float min = 100;
-  float max = 0;
 
   struct termios tty;
   struct termios tty_old;
