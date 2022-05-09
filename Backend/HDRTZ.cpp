@@ -21,7 +21,6 @@ using namespace std;
 
 const int SCREEN_WIDTH = 3840;
 const int SCREEN_HEIGHT = 2160;
-const float INTERVAL_CONST = 0.04; //= 0.04;
 const int fps = 24;
 
 //function to convert an openCV Mat to a SDL_Texture
