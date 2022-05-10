@@ -112,6 +112,8 @@ int main(int argc, char *args[])
     printf("SDL Image not initialized");
   SDL_Surface *maskSurf = IMG_Load("test.png");
   SDL_Texture *maskTex = SDL_CreateTextureFromSurface(renderer, maskSurf);
+  SDL_Surface *mask2Surf = IMG_Load("mask2.png");
+  SDL_Texture *mask2Tex = SDL_CreateTextureFromSurface(renderer, mask2Surf);
   SDL_Surface *xSurf = IMG_Load("xhair.png");
   SDL_Texture *xTex = SDL_CreateTextureFromSurface(renderer, xSurf);
 
@@ -153,22 +155,31 @@ int main(int argc, char *args[])
 
     int crosshair;
     int mask;
-    float scaleFactor = 0.5 + 0.5 * obj["zoom"].asInt() / 100;
+    float scaleFactor;
 
     //Resize the capture to be the size of the screen
     SDL_Rect videostream;
 
     videostream.w = 3840;
     videostream.h = 2160;
-
-    videostream.x = obj["xPos"].asInt();
-    p.x = 0;
-    
-
-    videostream.y = obj["yPos"].asInt();
-    p.y = 0;
-    crosshair = obj["crosshair"].asInt();
     mask = obj["mask"].asInt();
+    if (mask == 2)
+    {
+      videostream.x = -860;
+      p.x = -860;
+      videostream.y = 0;
+      p.y = 0;
+      scaleFactor = 0.5 + 0.5 * 80 / 100;
+      crosshair = obj["crosshair"].asInt();
+    }
+    else{
+      scaleFactor = 0.5 + 0.5 * obj["zoom"].asInt() / 100;
+      videostream.x = obj["xPos"].asInt();
+      p.x = 0;
+      videostream.y = obj["yPos"].asInt();
+      p.y = 0;
+      crosshair = obj["crosshair"].asInt();
+    }
 
 
     
@@ -206,24 +217,7 @@ int main(int argc, char *args[])
       }
     }
 
-    do
-    {
-      n = read(USB, &buf, 1);
-      sprintf(&response[spot], "%c", buf);
-      spot += n;
-    } while (buf != '\r' && n > 0);
 
-    tcflush(USB, TCIFLUSH);
-
-    if (n < 0)
-    {
-      //std::cout << "Error reading: " << strerror(errno) << std::endl;
-      //interval = 0;
-    }
-    else if (n == 0)
-    {
-      std::cout << "Read nothing!" << std::endl;
-    }
 
     //handle crank data
     bluetoothFile = fopen("bluetooth_output.txt", "r");
@@ -256,6 +250,10 @@ int main(int argc, char *args[])
       {
         SDL_RenderCopy(renderer, maskTex, NULL, NULL);
 
+      }
+      else if (mask == 2)
+      {
+        SDL_RenderCopy(renderer, mask2Tex, NULL, NULL);
       }
       //render the crosshair
       if (crosshair == 1)
