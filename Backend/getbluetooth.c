@@ -9,7 +9,8 @@ int main()
     FILE *fpipe;
     FILE *fp;
     char *filename = "bluetooth_output.txt";
-    char *command = "gatttool -b 03:81:56:96:83:09 --char-read -a 0x000c";
+    //char *command = "gatttool -b 03:81:56:96:83:09 --char-read -a 0x000c"; old arduino
+    char *command = "gatttool -b 4C:EB:D6:4E:58:CE --char-read -a 0x000c";
     char c = 0;
     int i = 0;
     char output[36] = "";

@@ -16,7 +16,7 @@
  * MA 02110-1301, USA.
  *
  */
-
+#define _GNU_SOURCE
 #include <assert.h>
 #include <stdio.h>
 #include <stdlib.h>
